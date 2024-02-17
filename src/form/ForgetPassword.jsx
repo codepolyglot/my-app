@@ -8,13 +8,18 @@ import {
   Stack,
   Text,
   useColorModeValue,
+  Spinner, // Import Spinner for loading state
 } from "@chakra-ui/react";
 
 const ForgetPassword = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState({ message: "", error: false });
 
   const handleClick = () => {
-    // Send email logic here
+    setLoading(true);
+    setFeedback({ message: "", error: false });
+
     // You can use an API or a library to send the email
     // For simplicity, let's assume we have a function called sendResetEmail
     sendResetEmail(email);
@@ -32,11 +37,19 @@ const ForgetPassword = () => {
       },
       body: JSON.stringify({ email }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to send reset email");
+        }
+        return response.json();
+      })
       .then((data) => {
-        console.log("Reset email sent successfully");
+        setLoading(false);
+        setFeedback({ message: "Reset email sent successfully", error: false });
       })
       .catch((error) => {
+        setLoading(false);
+        setFeedback({ message: "Error sending reset email", error: true });
         console.error("Error sending reset email:", error);
       });
   };
@@ -65,7 +78,7 @@ const ForgetPassword = () => {
           fontSize={{ base: "sm", sm: "md" }}
           color={useColorModeValue("gray.800", "gray.400")}
         >
-          You&apos;ll get an email with a reset link
+          You'll get an email with a reset link
         </Text>
         <FormControl id="email">
           <Input
@@ -80,14 +93,19 @@ const ForgetPassword = () => {
           <Button
             colorScheme={email ? "yellow" : "gray"}
             color={"white"}
-            disabled={!email}
+            disabled={!email || loading}
             _hover={{
               bg: "blue.500",
             }}
             onClick={handleClick}
           >
-            Request Reset
+            {loading ? <Spinner size="sm" /> : "Request Reset"}
           </Button>
+          {feedback.message && (
+            <Text color={feedback.error ? "red.500" : "green.500"}>
+              {feedback.message}
+            </Text>
+          )}
         </Stack>
       </Stack>
     </Flex>

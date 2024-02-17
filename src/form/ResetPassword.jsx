@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Flex,
@@ -11,6 +11,24 @@ import {
 } from "@chakra-ui/react";
 
 const ResetPassword = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
+
+  const handleSubmit = () => {
+    // Handle form submission logic here
+    console.log("Email:", email);
+    console.log("Password:", password);
+    // You can send the data to your server or perform any other action here
+  };
+
   return (
     <Flex
       minH={"100vh"}
@@ -37,11 +55,17 @@ const ResetPassword = () => {
             placeholder="your-email@example.com"
             _placeholder={{ color: "gray.500" }}
             type="email"
+            value={email}
+            onChange={handleEmailChange}
           />
         </FormControl>
         <FormControl id="password" isRequired>
           <FormLabel>Password</FormLabel>
-          <Input type="password" />
+          <Input
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
         </FormControl>
         <Stack spacing={6}>
           <Button
@@ -50,6 +74,7 @@ const ResetPassword = () => {
             _hover={{
               bg: "blue.500",
             }}
+            onClick={handleSubmit}
           >
             Submit
           </Button>

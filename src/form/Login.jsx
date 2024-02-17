@@ -11,13 +11,19 @@ import {
   Heading,
   Text,
   useColorModeValue,
+  Spinner, // Import Spinner for loading state
+  InputRightElement,
+  InputGroup,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
 const Login = ({ setLoggedIn }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // State for
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -31,6 +37,7 @@ const Login = ({ setLoggedIn }) => {
 
   const handleLogin = () => {
     if (isDisabled) {
+      setLoading(true); // Set loading state when login starts
       fetch("http://localhost:3001/login", {
         method: "POST",
         headers: {
@@ -38,16 +45,24 @@ const Login = ({ setLoggedIn }) => {
         },
         body: JSON.stringify({ email, password }),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          setLoading(false); // Reset loading state after request completes
+          if (!response.ok) {
+            throw new Error("Failed to login");
+          }
+          return response.json();
+        })
         .then((data) => {
           if (data.error) {
             setError(data.error);
           } else {
             setLoggedIn(true);
-            navigate("/dashboard");
+            navigate("/dashboard"); // Redirect to dashboard on successful login
           }
         })
         .catch((error) => {
+          setLoading(false); // Reset loading state in case of error
+          setError("Failed to login. Please try again."); // Display error message
           console.error("Error:", error);
         });
     } else {
@@ -64,7 +79,7 @@ const Login = ({ setLoggedIn }) => {
     >
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
-          <Heading fontSize={"4xl"}>Sign in to your account </Heading>
+          <Heading fontSize={"4xl"}>Sign in to your account</Heading>
           <Text fontSize={"lg"} color={"gray.600"}>
             to enjoy all of our cool features ✌️
           </Text>
@@ -76,6 +91,8 @@ const Login = ({ setLoggedIn }) => {
           p={8}
         >
           <Stack spacing={4}>
+            {error && <Text color="red.500">{error}</Text>}{" "}
+            {/* Display error message */}
             <FormControl id="email" isRequired>
               <FormLabel>Email address</FormLabel>
               <Input
@@ -86,12 +103,24 @@ const Login = ({ setLoggedIn }) => {
             </FormControl>
             <FormControl id="password" isRequired>
               <FormLabel>Password</FormLabel>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="*******"
-              />
+              <InputGroup>
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="*******"
+                />
+                <InputRightElement h={"full"}>
+                  <Button
+                    variant={"ghost"}
+                    onClick={() =>
+                      setShowPassword((showPassword) => !showPassword)
+                    }
+                  >
+                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                  </Button>
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
             <Stack spacing={10}>
               <Stack
@@ -105,14 +134,15 @@ const Login = ({ setLoggedIn }) => {
               <Button
                 bg={"blue.400"}
                 onClick={handleLogin}
-                disabled={!isDisabled}
+                disabled={!isDisabled || loading}
                 colorScheme={isDisabled ? "blue" : "gray"}
                 color={"white"}
                 _hover={{
                   bg: "blue.500",
                 }}
               >
-                Sign in
+                {loading ? <Spinner size="sm" /> : "Sign in"}{" "}
+                {/* Show spinner when loading */}
               </Button>
             </Stack>
           </Stack>
