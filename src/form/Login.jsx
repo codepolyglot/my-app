@@ -21,10 +21,39 @@ const Login = ({ setLoggedIn }) => {
 
   const navigate = useNavigate();
 
-  const isDisabled =
-    email && email.length > 0 && password && password.length > 0;
+  const isEmailValid = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(
+    email
+  );
+  const isPasswordValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(
+    password
+  );
+  const isDisabled = email && isEmailValid && password && isPasswordValid;
 
-  const handleClick = () => {};
+  const handleLogin = () => {
+    if (isDisabled) {
+      fetch("http://localhost:3001/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setLoggedIn(true);
+            navigate("/dashboard");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    } else {
+      setError("Invalid email or password");
+    }
+  };
 
   return (
     <Flex
@@ -35,9 +64,9 @@ const Login = ({ setLoggedIn }) => {
     >
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
-          <Heading fontSize={"4xl"}>Sign in to your account</Heading>
+          <Heading fontSize={"4xl"}>Sign in to your account </Heading>
           <Text fontSize={"lg"} color={"gray.600"}>
-            to enjoy all of our cool <Text color={"blue.400"}>features</Text> ✌️
+            to enjoy all of our cool features ✌️
           </Text>
         </Stack>
         <Box
@@ -61,6 +90,7 @@ const Login = ({ setLoggedIn }) => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="*******"
               />
             </FormControl>
             <Stack spacing={10}>
@@ -74,7 +104,7 @@ const Login = ({ setLoggedIn }) => {
               </Stack>
               <Button
                 bg={"blue.400"}
-                onClick={handleClick}
+                onClick={handleLogin}
                 disabled={!isDisabled}
                 colorScheme={isDisabled ? "blue" : "gray"}
                 color={"white"}

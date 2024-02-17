@@ -12,6 +12,8 @@ import {
   Heading,
   Text,
   useColorModeValue,
+  Alert,
+  AlertIcon,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,15 +21,12 @@ import { Link, useNavigate } from "react-router-dom";
 const Registration = () => {
   const [email, setEmail] = useState("");
   const [username, setUserName] = useState("");
-  const [error, setError] = useState("");
-  //   set password and confirm password state
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  //show password state
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const isDisabled =
     email &&
@@ -40,7 +39,16 @@ const Registration = () => {
     confirmPassword.length > 0 &&
     password === confirmPassword;
 
-  const handleClick = () => {};
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    setIsLoading(true);
+    // Simulating an API call for registration
+    setTimeout(() => {
+      setIsLoading(false);
+      setError("Failed to register. Please try again.");
+    }, 2000);
+  };
 
   return (
     <Flex
@@ -64,6 +72,12 @@ const Registration = () => {
           boxShadow={"lg"}
           p={8}
         >
+          {error && (
+            <Alert status="error" mb={4}>
+              <AlertIcon />
+              {error}
+            </Alert>
+          )}
           <Stack spacing={4}>
             <FormControl id="username" isRequired>
               <FormLabel>Username</FormLabel>
@@ -126,10 +140,11 @@ const Registration = () => {
             <Stack spacing={10} pt={2}>
               <Button
                 onClick={handleClick}
+                isLoading={isLoading}
                 loadingText="Submitting"
                 size="lg"
                 colorScheme={isDisabled ? "blue" : "gray"}
-                disabled={!isDisabled}
+                disabled={!isDisabled || isLoading}
                 color={"white"}
                 _hover={{
                   bg: "blue.500",
