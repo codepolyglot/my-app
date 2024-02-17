@@ -28,26 +28,49 @@ const Registration = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isEmailValid = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(
+    email
+  );
+  const isPasswordValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(
+    password
+  );
+
+  const isConfirmedPassword = password === confirmPassword;
+
   const isDisabled =
     email &&
-    email.length > 0 &&
-    password &&
-    password.length > 0 &&
+    isEmailValid &&
     username &&
-    username.length > 0 &&
-    confirmPassword &&
-    confirmPassword.length > 0 &&
-    password === confirmPassword;
-
+    password &&
+    isPasswordValid &&
+    isConfirmedPassword;
   const navigate = useNavigate();
 
   const handleClick = () => {
-    setIsLoading(true);
-    // Simulating an API call for registration
-    setTimeout(() => {
-      setIsLoading(false);
-      setError("Failed to register. Please try again.");
-    }, 2000);
+    if (isDisabled) {
+      setIsLoading(true);
+      fetch("http://localhost:3001/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, username, password }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+            setIsLoading(false);
+          } else {
+            navigate("/login");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    } else {
+      setError("Invalid email or password");
+    }
   };
 
   return (
@@ -119,7 +142,7 @@ const Registration = () => {
               <FormLabel>Confirm Password</FormLabel>
               <InputGroup>
                 <Input
-                  type={showPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />

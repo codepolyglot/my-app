@@ -13,7 +13,33 @@ import {
 const ForgetPassword = () => {
   const [email, setEmail] = useState("");
 
-  const handleClick = () => {};
+  const handleClick = () => {
+    // Send email logic here
+    // You can use an API or a library to send the email
+    // For simplicity, let's assume we have a function called sendResetEmail
+    sendResetEmail(email);
+  };
+
+  const sendResetEmail = (email) => {
+    // Implement your logic to send the reset email here
+    // This can involve making an API request or using a library like Nodemailer
+
+    // Example code using fetch API
+    fetch("/api/reset-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Reset email sent successfully");
+      })
+      .catch((error) => {
+        console.error("Error sending reset email:", error);
+      });
+  };
 
   return (
     <Flex
