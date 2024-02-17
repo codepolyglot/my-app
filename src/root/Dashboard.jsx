@@ -7,7 +7,7 @@ import ResetPassword from "../form/ResetPassword";
 import AdminPanel from "../main/AdminPanel";
 
 const Dashboard = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
   return (
     <>
       <Routes>
